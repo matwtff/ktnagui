@@ -17,10 +17,8 @@ ktna replaces the entire stack on raw direct3d 11:
 - **runtime in-memory hlsl compiler.** shaders are compiled in volatile memory via `D3DCompile` at runtime, leaving zero `.cso` files or bytecode artifacts on disk.
 - **hardware font engine.** generates a crisp segoe ui texture atlas directly into an immutable d3d11 srv, with no freetype or stb_truetype bloat.
 - **14-point pipeline state save and restore.** full snapshot and restoration of host d3d11 state (viewports, scissor rects, blend states, depth-stencil, samplers, constant buffers, and shader instances) so the host game never glitches or crashes.
-- **liquid glass mode.** frosted glass substrate, animated specular light sheen wave, and bevel rim catch-lights.
 - **spotify widget with synced lyrics.** pulls live playback from windows smtc without tokens or dev accounts, decodes album art, and renders real-time synced lyrics from lrclib with millisecond timeline interpolation.
-- **anti-capture external overlay.** built-in transparent overlay using `WDA_EXCLUDEFROMCAPTURE` so obs, discord screenshare, and anticheat screen grabs only see clean gameplay.
-
+- **anti-capture external overlay.** built-in transparent overlay using `WDA_EXCLUDEFROMCAPTURE` so obs, discord screenshare.
 ## integration
 
 ### 1. internal (dxgi present hook)
