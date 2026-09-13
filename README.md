@@ -179,3 +179,6 @@ cl /std:c++20 /O2 /W3 /EHsc /MD /nologo /I"include" ^
 ## license
 
 licensed under the [mit license](LICENSE).
+
+
+also check out my other projects too on my github profile!
