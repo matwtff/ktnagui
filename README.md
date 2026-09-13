@@ -1,71 +1,31 @@
 # ktna.wtf
 
-standalone c++20 directx 11 immediate-mode gui and overlay engine. made this from scratch because imgui gets signature-scanned by basically every anti-cheat nowadays.
+standalone c++20 directx 11 immediate-mode gui and overlay engine. built from scratch because imgui gets signature-scanned by basically every anti-cheat nowadays.
 
-zero imgui dependencies, custom 24-byte vertex stride, compiles hlsl in-memory at runtime, built-in liquid glass theme, and live spotify synced lyrics using winrt + lrclib.
+zero imgui dependencies, custom 24-byte vertex stride, in-memory hlsl compilation at runtime, liquid glass styling, and live spotify synced lyrics using winrt + lrclib.
 
-![ktna.wtf](media/preview.png)
+![ktna.wtf preview](media/preview.png)
 
-## why not just use imgui?
+## why ktna
 
-every public ac (eac, battleye, ricochet, ace, vanguard) scans memory for imgui signatures. the default 20-byte `ImDrawVert` stride, standard font textures, recognizable vtable layouts, and strings all get flagged.
+every public anti-cheat (eac, battleye, ricochet, ace, vanguard) scans memory for imgui signatures. the default 20-byte `ImDrawVert` stride, standard font textures, recognizable vtables, and hardcoded strings get flagged quickly.
 
-ktna replaces the whole thing on bare direct3d 11:
-- **zero imgui code**: completely custom immediate-mode architecture (`Context`, `DrawList`, `Widgets`, `Layout`).
-- **24-byte vertex stride**: custom vertex geometry layout (`x, y, u, v, color, flags`) that breaks standard 20-byte `ImDrawVert` pattern scanners.
-- **runtime in-memory hlsl compiler**: shaders are compiled in volatile memory via `D3DCompile` at runtime. zero `.cso` files or static bytecode on disk.
-- **hardware font engine**: generates a crisp segoe ui texture atlas directly into an immutable d3d11 srv. no freetype or stb_truetype bloat.
-- **14-point pipeline state save/restore**: full snapshot and restoration of host d3d11 state (viewports, scissor rects, blend states, depth-stencil, samplers, constant buffers, and shader instances) so the host game never crashes or glitches.
-- **liquid glass mode**: frosted glass substrate, animated specular light sheen wave, and bevel rim catch-lights.
-- **spotify widget + synced lyrics**: pulls live playback from windows smtc without tokens or dev accounts, decodes album art, and renders real-time synced lyrics from lrclib with millisecond timeline interpolation.
-- **anti-capture external overlay**: built-in transparent overlay using `WDA_EXCLUDEFROMCAPTURE` so obs, discord screenshare, and anticheat screen captures see clean gameplay.
+ktna replaces the entire stack on raw direct3d 11:
 
-## imgui vs ktna
-
-| feature | dear imgui | ktna.wtf |
-| :--- | :--- | :--- |
-| dependencies | third-party library | standalone c++20 |
-| ac detection | sigged by basically everything | custom layout / no pub signatures |
-| vertex stride | 20 bytes (`ImDrawVert`) | 24 bytes (`x, y, u, v, col, flags`) |
-| shaders | static embedded bytecode | dynamic runtime in-memory hlsl |
-| pipeline state | basic backup | 14-point d3d11 state save/restore |
-| styling | flat / basic borders | liquid glass + live specular sheen |
-| cards | manual child frames | auto-wrapping cards (zero dead space) |
-| popups | clipped by parent window | unclipped floating popup layer |
-| spotify / lyrics | none | built-in winrt smtc + synced lrclib |
-| stream-proof | manual setup | built-in `WDA_EXCLUDEFROMCAPTURE` |
-
-## repository structure
-
-```
-ktna/
-├── include/
-│   ├── void_types.hpp        # math (vec2, rect, color), vertex layout, theme
-│   ├── void_font.hpp         # segoe ui font atlas & glyph metrics
-│   ├── void_draw.hpp         # drawlist, vector primitives, glass shaders
-│   ├── void_layout.hpp       # auto-wrapping cards, columns, drag containers
-│   ├── void_widgets.hpp      # buttons, toggles, sliders, combos, keybinds
-│   ├── void_popup.hpp        # floating unclipped dropdown manager
-│   ├── void_gui.hpp          # context engine & ktna:: namespace
-│   ├── void_gui_d3d11.hpp    # d3d11 backend & hlsl runtime compiler
-│   ├── void_spotify.hpp      # winrt smtc media hook + synced lyrics
-│   ├── void_playerbar.hpp    # target info hud widget
-│   ├── void_overlay.hpp      # transparent borderless overlay window
-│   └── void_hook.hpp         # dummy swapchain vmt resolver & detour
-├── src/                      # engine implementations
-├── demo/
-│   └── main.cpp              # demo menu with esp, widgets, and spotify
-├── media/
-│   └── preview.png           # screenshot preview
-├── build.bat                 # msvc build script
-└── README.md
-```
+- **zero imgui code.** completely custom immediate-mode architecture (`Context`, `DrawList`, `Widgets`, `Layout`).
+- **custom 24-byte vertex layout.** uses `x, y, u, v, color, flags` to break standard 20-byte `ImDrawVert` pattern scanners.
+- **runtime in-memory hlsl compiler.** shaders are compiled in volatile memory via `D3DCompile` at runtime, leaving zero `.cso` files or bytecode artifacts on disk.
+- **hardware font engine.** generates a crisp segoe ui texture atlas directly into an immutable d3d11 srv, with no freetype or stb_truetype bloat.
+- **14-point pipeline state save and restore.** full snapshot and restoration of host d3d11 state (viewports, scissor rects, blend states, depth-stencil, samplers, constant buffers, and shader instances) so the host game never glitches or crashes.
+- **liquid glass mode.** frosted glass substrate, animated specular light sheen wave, and bevel rim catch-lights.
+- **spotify widget with synced lyrics.** pulls live playback from windows smtc without tokens or dev accounts, decodes album art, and renders real-time synced lyrics from lrclib with millisecond timeline interpolation.
+- **anti-capture external overlay.** built-in transparent overlay using `WDA_EXCLUDEFROMCAPTURE` so obs, discord screenshare, and anticheat screen grabs only see clean gameplay.
 
 ## integration
 
 ### 1. internal (dxgi present hook)
 
-resolves the swapchain vtable using a throwaway dummy device so we never leak handles or query live game objects:
+resolves the swapchain vtable using a throwaway dummy device, so we never leak handles or touch live game objects:
 
 ```cpp
 #include "void_gui.hpp"
@@ -105,11 +65,11 @@ HRESULT __stdcall Hook_Present(IDXGISwapChain* swap, UINT sync, UINT flags) {
 }
 ```
 
-> **rtss hook note**: on titles with aggressive code integrity (like fortnite/eac), hook rivatuner's osd render callback (`RTSSHooks64.dll`) instead of the game swapchain. rtss is signed and whitelisted by anti-cheats.
+> note: on titles with aggressive code integrity checks (like fortnite/eac), hook rivatuner's osd render callback (`RTSSHooks64.dll`) instead of the game's direct swapchain. rtss is signed and whitelisted.
 
 ### 2. external (stream-proof overlay)
 
-spins up a transparent borderless d3d11 window and calls `SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE)` so obs, discord screenshare, and anticheat bitblt grabs see clean gameplay:
+creates a transparent borderless d3d11 window and applies `SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE)`. obs, discord screenshare, and anticheat bitblt captures will only record the game behind it:
 
 ```cpp
 #include "void_overlay.hpp"
@@ -119,7 +79,7 @@ spins up a transparent borderless d3d11 window and calls `SetWindowDisplayAffini
 int main() {
     if (!ktna::ExternalOverlay::Initialize("Target Game Window")) return 1;
 
-    // hide from obs / discord / screen capture
+    // hide from obs, discord, and screen captures
     SetWindowDisplayAffinity(ktna::ExternalOverlay::GetOverlayHWND(), WDA_EXCLUDEFROMCAPTURE);
 
     ktna::Context gui;
@@ -148,9 +108,9 @@ int main() {
 }
 ```
 
-## ui usage
+## example menu
 
-clean immediate-mode syntax:
+immediate-mode syntax with auto-wrapping card containers:
 
 ```cpp
 ktna::Context gui;
@@ -163,7 +123,7 @@ if (gui.Begin("ktna.wtf", ktna::Vec2(334, 55), ktna::Vec2(560, 580))) {
 
     gui.Columns(2);
 
-    // card height wraps children automatically
+    // card height automatically wraps its children
     gui.BeginCard("targeting");
     static bool aimbot = true;
     static float fov = 14.5f;
@@ -191,14 +151,14 @@ if (gui.Begin("ktna.wtf", ktna::Vec2(334, 55), ktna::Vec2(560, 580))) {
 
 ## building
 
-compile with msvc x64:
+compile using the included `build.bat` in an msvc x64 command prompt:
 
 ```cmd
 cd void_gui
 build.bat
 ```
 
-or manually with `cl`:
+or compile manually with `cl`:
 
 ```cmd
 cl /std:c++20 /O2 /W3 /EHsc /MD /nologo /I"include" ^
@@ -211,11 +171,11 @@ cl /std:c++20 /O2 /W3 /EHsc /MD /nologo /I"include" ^
 
 ## controls
 
-- `insert`: open / close menu
-- `f12`: save raw d3d11 backbuffer screenshot to `screenshot.bmp`
-- `mouse wheel`: scroll synced lyrics / containers
-- `left click + drag`: move menu / hud widgets around
+- `insert`: open and close the menu.
+- `f12`: save raw d3d11 backbuffer screenshot to `screenshot.bmp`.
+- `mouse wheel`: scroll through synced lyrics and cards.
+- `left click + drag`: reposition the main window and hud widgets.
 
 ## license
 
-mit
+licensed under the [mit license](LICENSE).
