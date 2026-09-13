@@ -1,4 +1,4 @@
-# ktna.wtf
+# ktnagui
 
 standalone c++20 directx 11 immediate-mode gui and overlay engine. built from scratch because imgui gets signature-scanned by basically every anti-cheat nowadays.
 
