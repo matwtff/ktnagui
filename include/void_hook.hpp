@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -14,16 +14,13 @@ namespace VoidGUI {
 
     class InternalHook {
     public:
-        // Resolves the 64-bit IDXGISwapChain VTable via throwaway dummy device
         static void** ResolveSwapchainVTable();
 
-        // Lightweight VMT hook primitive (or pointer swap)
         static bool InstallVMTHook(void** vtable, int index, void* hook_fn, void** original_fn);
         static bool RemoveVMTHook(void** vtable, int index, void* original_fn);
 
-        // Subclasses target window procedure for input capture
         static bool HookWndProc(HWND hWnd, WNDPROC hook_proc, WNDPROC* original_proc);
         static bool UnhookWndProc(HWND hWnd, WNDPROC original_proc);
     };
 
-} // namespace VoidGUI
+}

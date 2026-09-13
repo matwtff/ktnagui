@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "void_types.hpp"
 #include "void_draw.hpp"
@@ -14,7 +14,7 @@ namespace VoidGUI {
         int max_health = 100;
         int armor = 65;
         std::string weapon = "AK-47 [Asiimov]";
-        float distance = 142.5f; // meters
+        float distance = 142.5f;
         bool is_enemy = true;
     };
 
@@ -27,4 +27,4 @@ namespace VoidGUI {
         static PlayerBarData s_data;
     };
 
-} // namespace VoidGUI
+}

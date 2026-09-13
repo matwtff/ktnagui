@@ -1,4 +1,4 @@
-#include "../include/void_hook.hpp"
+﻿#include "../include/void_hook.hpp"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -109,4 +109,4 @@ namespace VoidGUI {
         return true;
     }
 
-} // namespace VoidGUI
+}

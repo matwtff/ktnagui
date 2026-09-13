@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "void_types.hpp"
 #include "void_draw.hpp"
@@ -25,4 +25,4 @@ namespace VoidGUI {
         static void Spacing(Context* ctx, float height = 6.0f);
     };
 
-} // namespace VoidGUI
+}

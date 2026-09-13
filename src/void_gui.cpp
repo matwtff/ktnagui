@@ -1,4 +1,4 @@
-#include "../include/void_gui.hpp"
+﻿#include "../include/void_gui.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdarg>
@@ -20,22 +20,15 @@ namespace VoidGUI {
         m_theme.liquid_time += m_delta_time;
         m_draw_list.Clear();
 
-        // Edge detection for reliable, crisp hardware clicks
-        m_input.mouse_clicked = (m_input.mouse_down && !m_input.mouse_down_prev);
+        m_input.mouse_clicked = m_mouse_clicked_queued || (m_input.mouse_down && !m_input.mouse_down_prev);
+        m_mouse_clicked_queued = false;
         m_input.mouse_released = (!m_input.mouse_down && m_input.mouse_down_prev);
         m_input.mouse_down_prev = m_input.mouse_down;
 
         if (!m_input.mouse_down) {
-            if (m_current_window.dragging) {
-                m_current_window.dragging = false;
-            }
-            if (m_current_window.resizing) {
-                m_current_window.resizing = false;
-            }
-            if (m_drag_item.id != 0) {
-                m_drag_item.id = 0;
-            }
-            // If active_id is not a modal keybind waiting for user input, clear it
+            m_current_window.dragging = false;
+            m_current_window.resizing = false;
+            m_drag_item.id = 0;
             if (m_active_id != 0 && m_active_id != m_keybind_id) {
                 m_active_id = 0;
             }
@@ -45,7 +38,6 @@ namespace VoidGUI {
     }
 
     void Context::Render() {
-        // Draw commands are prepared in m_draw_list and executed by backend
     }
 
     void Context::SetMousePos(float x, float y) {
@@ -53,6 +45,9 @@ namespace VoidGUI {
     }
 
     void Context::SetMouseDown(bool down) {
+        if (down && !m_input.mouse_down) {
+            m_mouse_clicked_queued = true;
+        }
         m_input.mouse_down = down;
     }
 
@@ -60,7 +55,6 @@ namespace VoidGUI {
         m_input.mouse_wheel = delta;
     }
 
-    // FNV-1a 32-bit Hash (Fast, zero-collision immediate-mode ID generator)
     uint32_t Context::GetId(const char* str) {
         if (!str) return 0;
         uint32_t hash = 0x811C9DC5;
@@ -168,4 +162,4 @@ namespace VoidGUI {
         Widgets::Spacing(this, height);
     }
 
-} // namespace VoidGUI
+}

@@ -1,4 +1,4 @@
-#include "../include/void_overlay.hpp"
+﻿#include "../include/void_overlay.hpp"
 #include <dwmapi.h>
 
 #pragma comment(lib, "dwmapi.lib")
@@ -75,12 +75,10 @@ namespace VoidGUI {
 
         if (!s_overlay_hwnd) return false;
 
-        // DWM transparent glass composition
         SetLayeredWindowAttributes(s_overlay_hwnd, RGB(0, 0, 0), 255, LWA_ALPHA);
         MARGINS margins = { -1, -1, -1, -1 };
         DwmExtendFrameIntoClientArea(s_overlay_hwnd, &margins);
 
-        // Setup D3D11 for transparent backbuffer
         DXGI_SWAP_CHAIN_DESC sd = {};
         sd.BufferCount = 2;
         sd.BufferDesc.Width = s_width;
@@ -197,4 +195,4 @@ namespace VoidGUI {
     bool ExternalOverlay::IsRunning() { return s_running; }
     Vec2 ExternalOverlay::GetScreenSize() { return Vec2(static_cast<float>(s_width), static_cast<float>(s_height)); }
 
-} // namespace VoidGUI
+}

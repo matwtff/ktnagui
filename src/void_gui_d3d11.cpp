@@ -1,4 +1,4 @@
-#include "../include/void_gui_d3d11.hpp"
+﻿#include "../include/void_gui_d3d11.hpp"
 #include "../include/void_font.hpp"
 #include <d3dcompiler.h>
 #include <cstring>
@@ -28,7 +28,6 @@ namespace VoidGUI {
         float mvp[4][4];
     };
 
-    // In-memory HLSL runtime shader source
     static const char* s_shader_hlsl =
         "Texture2D u_Texture : register(t0);\n"
         "SamplerState u_Sampler : register(s0);\n"
@@ -67,7 +66,6 @@ namespace VoidGUI {
 
         if (g_pVB) D3D11_InvalidateDeviceObjects();
 
-        // Compile Vertex Shader
         ID3DBlob* vsBlob = nullptr;
         ID3DBlob* errorBlob = nullptr;
         HRESULT hr = D3DCompile(s_shader_hlsl, strlen(s_shader_hlsl), nullptr, nullptr, nullptr,
@@ -83,7 +81,6 @@ namespace VoidGUI {
             return false;
         }
 
-        // Custom 24-byte input layout (UD: differs from standard 20-byte ImDrawVert)
         D3D11_INPUT_ELEMENT_DESC local_layout[] = {
             { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,   0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
             { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,   0, 8,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -95,7 +92,6 @@ namespace VoidGUI {
         vsBlob->Release();
         if (FAILED(hr)) return false;
 
-        // Compile Pixel Shader
         ID3DBlob* psBlob = nullptr;
         hr = D3DCompile(s_shader_hlsl, strlen(s_shader_hlsl), nullptr, nullptr, nullptr,
                                 "PSMain", "ps_4_0", 0, 0, &psBlob, &errorBlob);
@@ -108,7 +104,6 @@ namespace VoidGUI {
         psBlob->Release();
         if (FAILED(hr)) return false;
 
-        // Constant Buffer
         D3D11_BUFFER_DESC cbDesc = {};
         cbDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
         cbDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -117,7 +112,6 @@ namespace VoidGUI {
         hr = g_pd3dDevice->CreateBuffer(&cbDesc, nullptr, &g_pConstantBuffer);
         if (FAILED(hr)) return false;
 
-        // Blend State (Alpha Blending)
         D3D11_BLEND_DESC blendDesc = {};
         blendDesc.AlphaToCoverageEnable = false;
         blendDesc.RenderTarget[0].BlendEnable = true;
@@ -130,7 +124,6 @@ namespace VoidGUI {
         blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
         g_pd3dDevice->CreateBlendState(&blendDesc, &g_pBlendState);
 
-        // Rasterizer State (Scissor Test enabled, no culling)
         D3D11_RASTERIZER_DESC rastDesc = {};
         rastDesc.FillMode = D3D11_FILL_SOLID;
         rastDesc.CullMode = D3D11_CULL_NONE;
@@ -138,14 +131,12 @@ namespace VoidGUI {
         rastDesc.DepthClipEnable = true;
         g_pd3dDevice->CreateRasterizerState(&rastDesc, &g_pRasterizerState);
 
-        // Depth Stencil State (Disabled)
         D3D11_DEPTH_STENCIL_DESC depthDesc = {};
         depthDesc.DepthEnable = false;
         depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
         depthDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
         g_pd3dDevice->CreateDepthStencilState(&depthDesc, &g_pDepthStencilState);
 
-        // Linear Sampler State for Textures
         D3D11_SAMPLER_DESC samplerDesc = {};
         samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
         samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -190,7 +181,6 @@ namespace VoidGUI {
         if (!g_pVB) D3D11_CreateDeviceObjects();
     }
 
-    // D3D11 pipeline state snapshot (14-point restoration prevents host state corruption)
     struct BACKUP_DX11_STATE {
         UINT                        ScissorRectsCount, ViewportsCount;
         D3D11_RECT                  ScissorRects[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
@@ -220,7 +210,6 @@ namespace VoidGUI {
     void D3D11_Render(DrawList* draw_list, float screen_width, float screen_height) {
         if (!draw_list || draw_list->vertices.empty() || draw_list->indices.empty()) return;
 
-        // Allocate / grow dynamic vertex buffer
         if (!g_pVB || g_VertexBufferSize < static_cast<int>(draw_list->vertices.size())) {
             if (g_pVB) { g_pVB->Release(); g_pVB = nullptr; }
             g_VertexBufferSize = static_cast<int>(draw_list->vertices.size()) + 5000;
@@ -232,7 +221,6 @@ namespace VoidGUI {
             if (FAILED(g_pd3dDevice->CreateBuffer(&desc, nullptr, &g_pVB))) return;
         }
 
-        // Allocate / grow dynamic index buffer
         if (!g_pIB || g_IndexBufferSize < static_cast<int>(draw_list->indices.size())) {
             if (g_pIB) { g_pIB->Release(); g_pIB = nullptr; }
             g_IndexBufferSize = static_cast<int>(draw_list->indices.size()) + 10000;
@@ -244,7 +232,6 @@ namespace VoidGUI {
             if (FAILED(g_pd3dDevice->CreateBuffer(&desc, nullptr, &g_pIB))) return;
         }
 
-        // Copy vertex & index data
         D3D11_MAPPED_SUBRESOURCE vtx_resource, idx_resource;
         if (SUCCEEDED(g_pd3dDeviceContext->Map(g_pVB, 0, D3D11_MAP_WRITE_DISCARD, 0, &vtx_resource))) {
             memcpy(vtx_resource.pData, draw_list->vertices.data(), draw_list->vertices.size() * sizeof(Vertex));
@@ -255,7 +242,6 @@ namespace VoidGUI {
             g_pd3dDeviceContext->Unmap(g_pIB, 0);
         }
 
-        // Setup orthographic projection matrix
         D3D11_MAPPED_SUBRESOURCE mapped_res;
         if (SUCCEEDED(g_pd3dDeviceContext->Map(g_pConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_res))) {
             CONSTANT_BUFFER* cb = reinterpret_cast<CONSTANT_BUFFER*>(mapped_res.pData);
@@ -273,7 +259,6 @@ namespace VoidGUI {
             g_pd3dDeviceContext->Unmap(g_pConstantBuffer, 0);
         }
 
-        // Snapshot pipeline state
         BACKUP_DX11_STATE old = {};
         old.ScissorRectsCount = old.ViewportsCount = D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE;
         g_pd3dDeviceContext->RSGetScissorRects(&old.ScissorRectsCount, old.ScissorRects);
@@ -291,7 +276,6 @@ namespace VoidGUI {
         g_pd3dDeviceContext->IAGetVertexBuffers(0, 1, &old.VertexBuffer, &old.VertexBufferStride, &old.VertexBufferOffset);
         g_pd3dDeviceContext->IAGetInputLayout(&old.InputLayout);
 
-        // Bind engine pipeline state
         D3D11_VIEWPORT vp = {};
         vp.Width = screen_width;
         vp.Height = screen_height;
@@ -301,7 +285,7 @@ namespace VoidGUI {
         vp.TopLeftY = 0;
         g_pd3dDeviceContext->RSSetViewports(1, &vp);
 
-        UINT stride = sizeof(Vertex); // 24 bytes
+        UINT stride = sizeof(Vertex);
         UINT offset = 0;
         g_pd3dDeviceContext->IASetInputLayout(g_pInputLayout);
         g_pd3dDeviceContext->IASetVertexBuffers(0, 1, &g_pVB, &stride, &offset);
@@ -338,7 +322,6 @@ namespace VoidGUI {
             g_pd3dDeviceContext->DrawIndexed(cmd.index_count, cmd.index_offset, 0);
         }
 
-        // Restore pipeline state
         g_pd3dDeviceContext->RSSetScissorRects(old.ScissorRectsCount, old.ScissorRects);
         g_pd3dDeviceContext->RSSetViewports(old.ViewportsCount, old.Viewports);
         g_pd3dDeviceContext->RSSetState(old.RS); if (old.RS) old.RS->Release();
@@ -360,4 +343,4 @@ namespace VoidGUI {
     ID3D11Device* D3D11_GetDevice() { return g_pd3dDevice; }
     ID3D11DeviceContext* D3D11_GetContext() { return g_pd3dDeviceContext; }
 
-} // namespace VoidGUI
+}

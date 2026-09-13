@@ -32,7 +32,6 @@ resolves the swapchain vtable using a throwaway dummy device, so we never leak h
 #include "void_gui_d3d11.hpp"
 #include "void_hook.hpp"
 
-// hook IDXGISwapChain::Present
 HRESULT __stdcall Hook_Present(IDXGISwapChain* swap, UINT sync, UINT flags) {
     static bool init = false;
     static ktna::Context gui;
@@ -79,7 +78,6 @@ creates a transparent borderless d3d11 window and applies `SetWindowDisplayAffin
 int main() {
     if (!ktna::ExternalOverlay::Initialize("Target Game Window")) return 1;
 
-    // hide from obs, discord, and screen captures
     SetWindowDisplayAffinity(ktna::ExternalOverlay::GetOverlayHWND(), WDA_EXCLUDEFROMCAPTURE);
 
     ktna::Context gui;
@@ -92,7 +90,6 @@ int main() {
         gui.NewFrame();
         ktna::D3D11_NewFrame();
 
-        // draw esp
         ktna::DrawList* dl = gui.GetDrawList();
         dl->AddRect(ktna::Vec2(200, 150), ktna::Vec2(260, 320), ktna::Color(139, 92, 246, 255), 2.0f);
 
@@ -123,7 +120,6 @@ if (gui.Begin("ktna.wtf", ktna::Vec2(334, 55), ktna::Vec2(560, 580))) {
 
     gui.Columns(2);
 
-    // card height automatically wraps its children
     gui.BeginCard("targeting");
     static bool aimbot = true;
     static float fov = 14.5f;
@@ -179,6 +175,3 @@ cl /std:c++20 /O2 /W3 /EHsc /MD /nologo /I"include" ^
 ## license
 
 licensed under the [mit license](LICENSE).
-
-
-also check out my other projects too on my github profile!

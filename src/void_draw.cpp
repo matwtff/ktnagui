@@ -1,4 +1,4 @@
-#include "../include/void_draw.hpp"
+﻿#include "../include/void_draw.hpp"
 #include <cmath>
 
 namespace VoidGUI {
@@ -27,11 +27,10 @@ namespace VoidGUI {
         }
     }
 
-    void DrawList::PushClipRect(const Rect& rect) {
-        if (clip_stack.empty()) {
+    void DrawList::PushClipRect(const Rect& rect, bool intersect_with_current) {
+        if (clip_stack.empty() || !intersect_with_current) {
             clip_stack.push_back(rect);
         } else {
-            // Intersection with parent clip rect
             const Rect& parent = clip_stack.back();
             Rect intersected(
                 std::max(parent.min.x, rect.min.x),
@@ -70,6 +69,13 @@ namespace VoidGUI {
         indices.push_back(base + 3);
 
         commands.back().index_count += 6;
+    }
+
+    void DrawList::AddPolyline(const Vec2* points, int count, Color col, float thickness) {
+        if (!points || count < 2) return;
+        for (int i = 0; i < count - 1; ++i) {
+            AddLine(points[i], points[i + 1], col, thickness);
+        }
     }
 
     void DrawList::AddRectFilled(Vec2 min, Vec2 max, Color col, float rounding) {
@@ -393,45 +399,55 @@ namespace VoidGUI {
         float h = max.y - min.y;
         if (w <= 0.0f || h <= 0.0f) return;
 
-        // base shadow & accent glow
-        AddShadow(min, max, rounding, 14.0f, Color(0, 0, 0, 160));
-        AddGlow(min, max, rounding, 6.0f, liquid_accent.WithAlpha(30));
+        AddShadow(min, max, rounding, 12.0f, Color(0, 0, 0, 130));
+        AddGlow(min, max, rounding, 6.0f, liquid_accent.WithAlpha(18));
 
-        // glass gradient
-        Color c_tl = Color::Lerp(base_glass, Color(28, 36, 60, base_glass.a), 0.35f);
-        Color c_tr = Color::Lerp(base_glass, Color(34, 44, 70, base_glass.a), 0.25f);
-        Color c_br = Color(static_cast<uint8_t>(base_glass.r * 0.6f), static_cast<uint8_t>(base_glass.g * 0.6f), static_cast<uint8_t>(base_glass.b * 0.6f), (uint8_t)std::min(255, base_glass.a + 25));
-        Color c_bl = Color(static_cast<uint8_t>(base_glass.r * 0.6f), static_cast<uint8_t>(base_glass.g * 0.6f), static_cast<uint8_t>(base_glass.b * 0.6f), (uint8_t)std::min(255, base_glass.a + 20));
+        Color c_tl = Color(
+            static_cast<uint8_t>(std::min(255, base_glass.r + 4)),
+            static_cast<uint8_t>(std::min(255, base_glass.g + 4)),
+            static_cast<uint8_t>(std::min(255, base_glass.b + 6)),
+            base_glass.a
+        );
+        Color c_tr = Color(
+            static_cast<uint8_t>(std::min(255, base_glass.r + 2)),
+            static_cast<uint8_t>(std::min(255, base_glass.g + 2)),
+            static_cast<uint8_t>(std::min(255, base_glass.b + 4)),
+            base_glass.a
+        );
+        Color c_br = Color(
+            static_cast<uint8_t>(std::max(0, base_glass.r - 4)),
+            static_cast<uint8_t>(std::max(0, base_glass.g - 4)),
+            static_cast<uint8_t>(std::max(0, base_glass.b - 2)),
+            static_cast<uint8_t>(std::min(255, base_glass.a + 12))
+        );
+        Color c_bl = Color(
+            static_cast<uint8_t>(std::max(0, base_glass.r - 3)),
+            static_cast<uint8_t>(std::max(0, base_glass.g - 3)),
+            static_cast<uint8_t>(std::max(0, base_glass.b - 1)),
+            static_cast<uint8_t>(std::min(255, base_glass.a + 8))
+        );
 
         AddRectFilledGradient(min, max, c_tl, c_tr, c_br, c_bl);
 
-        // light sheen wave
-        float sweep = std::fmod(time * 0.35f, 1.0f);
-        float wave_x = min.x - h * 0.4f + sweep * (w + h * 0.8f);
-        float wave_w = std::min(w * 0.45f, 160.0f);
-
-        Vec2 w_min(std::max(min.x, wave_x), min.y);
-        Vec2 w_max(std::min(max.x, wave_x + wave_w), min.y + h * 0.55f);
-        if (w_max.x > w_min.x && w_max.y > w_min.y) {
-            Color wave_center = Color(255, 255, 255, 22);
-            Color wave_edge = Color(255, 255, 255, 0);
-            AddRectFilledGradient(w_min, w_max, wave_edge, wave_center, wave_edge, wave_edge);
+        float top_fade_h = std::min(h * 0.35f, 28.0f);
+        if (top_fade_h > 2.0f) {
+            AddRectFilledGradient(
+                min, Vec2(max.x, min.y + top_fade_h),
+                Color(255, 255, 255, 10), Color(255, 255, 255, 8),
+                Color(255, 255, 255, 0), Color(255, 255, 255, 0)
+            );
         }
 
-        // borders
-        AddRect(min, max, rim_highlight.WithAlpha(150), rounding, 1.0f);
+        AddRect(min, max, rim_highlight, rounding, 1.0f);
 
-        // top highlight
         float rim_pad = std::max(2.0f, rounding);
         if (w > rim_pad * 2.0f) {
-            AddLine(Vec2(min.x + rim_pad, min.y + 0.5f), Vec2(max.x - rim_pad, min.y + 0.5f), Color(255, 255, 255, 115), 1.0f);
-            AddLine(Vec2(min.x + 0.5f, min.y + rim_pad), Vec2(min.x + 0.5f, min.y + std::min(h * 0.5f, 40.0f)), Color(255, 255, 255, 65), 1.0f);
+            AddLine(Vec2(min.x + rim_pad, min.y + 0.5f), Vec2(max.x - rim_pad, min.y + 0.5f), Color(255, 255, 255, 55), 1.0f);
         }
 
-        // inner rim
         if (w > 4.0f && h > 4.0f) {
-            AddRect(min + Vec2(1.0f, 1.0f), max - Vec2(1.0f, 1.0f), Color(255, 255, 255, 16), std::max(0.0f, rounding - 1.0f), 1.0f);
+            AddRect(min + Vec2(1.0f, 1.0f), max - Vec2(1.0f, 1.0f), Color(255, 255, 255, 8), std::max(0.0f, rounding - 1.0f), 1.0f);
         }
     }
 
-} // namespace VoidGUI
+}

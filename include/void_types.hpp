@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -93,7 +93,6 @@ namespace VoidGUI {
         }
     };
 
-    // 24-byte vertex stride (divergent from standard 20-byte ImDrawVert)
     struct Vertex {
         float x, y;
         float u, v;
@@ -121,84 +120,41 @@ namespace VoidGUI {
         bool liquid_glass     = true;
         float liquid_time     = 0.0f;
 
-        Color bg_window       = Color(12, 15, 24, 185);
-        Color bg_titlebar     = Color(16, 20, 34, 210);
-        Color card_bg         = Color(16, 20, 32, 150);
-        Color card_header     = Color(22, 28, 44, 190);
-        Color border          = Color(65, 78, 110, 180);
-        Color border_subtle   = Color(45, 55, 80, 140);
-        Color border_bright   = Color(160, 185, 245, 200);
+        Color bg_window       = Color(10, 10, 12, 244);
+        Color bg_titlebar     = Color(14, 14, 16, 248);
+        Color card_bg         = Color(17, 17, 21, 195);
+        Color card_header     = Color(21, 21, 25, 210);
+        Color border          = Color(255, 255, 255, 16);
+        Color border_subtle   = Color(255, 255, 255, 10);
+        Color border_bright   = Color(255, 255, 255, 38);
 
-        Color accent          = Color(139, 92, 246, 255);
-        Color accent_hover    = Color(167, 139, 250, 255);
-        Color accent_dim      = Color(124, 58, 237, 85);
-        Color accent_gradient = Color(56, 189, 248, 255);
+        Color accent          = Color(245, 245, 250, 255);
+        Color accent_hover    = Color(255, 255, 255, 255);
+        Color accent_dim      = Color(255, 255, 255, 35);
+        Color accent_gradient = Color(185, 185, 195, 255);
 
-        Color widget_bg       = Color(22, 27, 42, 180);
-        Color widget_hover    = Color(32, 38, 58, 210);
-        Color widget_active   = Color(42, 50, 76, 230);
+        Color widget_bg       = Color(22, 22, 26, 220);
+        Color widget_hover    = Color(32, 32, 38, 235);
+        Color widget_active   = Color(44, 44, 52, 245);
 
-        Color text            = Color(245, 248, 255, 255);
-        Color text_muted      = Color(150, 160, 185, 255);
-        Color text_dim        = Color(95, 105, 130, 255);
+        Color text            = Color(248, 248, 252, 255);
+        Color text_muted      = Color(145, 145, 152, 255);
+        Color text_dim        = Color(92, 92, 98, 255);
         Color checkmark       = Color(255, 255, 255, 255);
 
-        Color success         = Color(34, 197, 94, 255);
-        Color danger          = Color(239, 68, 68, 255);
+        Color success         = Color(74, 222, 128, 255);
+        Color danger          = Color(248, 113, 113, 255);
 
-        float window_rounding = 8.0f;
-        float frame_rounding  = 5.0f;
-        float card_rounding   = 6.0f;
-        float item_spacing    = 8.0f;
+        float window_rounding = 14.0f;
+        float frame_rounding  = 7.0f;
+        float card_rounding   = 10.0f;
+        float item_spacing    = 9.0f;
 
-        void SetLiquidGlass(bool enable) {
-            liquid_glass = enable;
-            if (enable) {
-                bg_window       = Color(12, 15, 24, 185);
-                bg_titlebar     = Color(16, 20, 34, 210);
-                card_bg         = Color(16, 20, 32, 150);
-                card_header     = Color(22, 28, 44, 190);
-                border          = Color(65, 78, 110, 180);
-                border_subtle   = Color(45, 55, 80, 140);
-                border_bright   = Color(160, 185, 245, 200);
-
-                accent          = Color(139, 92, 246, 255);
-                accent_hover    = Color(167, 139, 250, 255);
-                accent_dim      = Color(124, 58, 237, 85);
-                accent_gradient = Color(56, 189, 248, 255);
-
-                widget_bg       = Color(22, 27, 42, 180);
-                widget_hover    = Color(32, 38, 58, 210);
-                widget_active   = Color(42, 50, 76, 230);
-
-                text            = Color(245, 248, 255, 255);
-                text_muted      = Color(150, 160, 185, 255);
-                text_dim        = Color(95, 105, 130, 255);
-            } else {
-                bg_window       = Color(13, 14, 19, 252);
-                bg_titlebar     = Color(18, 20, 27, 255);
-                card_bg         = Color(19, 22, 30, 245);
-                card_header     = Color(24, 27, 38, 255);
-                border          = Color(35, 39, 52, 255);
-                border_subtle   = Color(28, 31, 42, 255);
-                border_bright   = Color(55, 62, 82, 255);
-
-                accent          = Color(124, 58, 237, 255);
-                accent_hover    = Color(139, 92, 246, 255);
-                accent_dim      = Color(124, 58, 237, 80);
-                accent_gradient = Color(168, 85, 247, 255);
-
-                widget_bg       = Color(25, 28, 38, 255);
-                widget_hover    = Color(34, 38, 52, 255);
-                widget_active   = Color(44, 49, 66, 255);
-
-                text            = Color(240, 243, 250, 255);
-                text_muted      = Color(135, 142, 160, 255);
-                text_dim        = Color(85, 92, 110, 255);
-            }
+        void SetLiquidGlass(bool enable = true) {
+            liquid_glass = true;
         }
     };
 
-} // namespace VoidGUI
+}
 
 namespace ktna = VoidGUI;

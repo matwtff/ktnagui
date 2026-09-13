@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "void_types.hpp"
 #include "void_font.hpp"
@@ -13,10 +13,11 @@ namespace VoidGUI {
         std::vector<Rect> clip_stack;
 
         void Clear();
-        void PushClipRect(const Rect& rect);
+        void PushClipRect(const Rect& rect, bool intersect_with_current = true);
         void PopClipRect();
 
         void AddLine(Vec2 p1, Vec2 p2, Color col, float thickness = 1.0f);
+        void AddPolyline(const Vec2* points, int count, Color col, float thickness = 1.0f);
         void AddRect(Vec2 min, Vec2 max, Color col, float rounding = 0.0f, float thickness = 1.0f);
         void AddRectFilled(Vec2 min, Vec2 max, Color col, float rounding = 0.0f);
         void AddRectFilledGradient(Vec2 min, Vec2 max, Color c_tl, Color c_tr, Color c_br, Color c_bl);
@@ -34,4 +35,4 @@ namespace VoidGUI {
         void EnsureCommand(void* texture_id = nullptr);
     };
 
-} // namespace VoidGUI
+}

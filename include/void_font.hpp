@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "void_types.hpp"
 struct ID3D11Device;
@@ -33,4 +33,4 @@ namespace VoidGUI {
         static const uint8_t* GetGlyphBitmap(char c, uint8_t& out_w, uint8_t& out_h);
     };
 
-} // namespace VoidGUI
+}

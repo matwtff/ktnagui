@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "void_types.hpp"
 #include "void_font.hpp"
@@ -18,29 +18,23 @@ namespace VoidGUI {
         void NewFrame(float delta_time = 0.016f);
         void Render();
 
-        // Hardware Input Stream
         void SetMousePos(float x, float y);
         void SetMouseDown(bool down);
         void SetMouseWheel(float delta);
 
-        // Window & Layout Flow
         bool Begin(const char* title, Vec2 default_pos, Vec2 default_size);
         void End();
 
-        // Multi-Column Responsive System
         void Columns(int count);
         void NextColumn();
         void EndColumns();
 
-        // Group Containers & Adaptive Auto-Sized Cards (Eliminates empty boxes)
         void BeginCard(const char* title, float fixed_height = 0.0f);
         void EndCard();
 
-        // Standalone Draggable Modular Window
         bool BeginDraggableCard(const char* title, Vec2* pos, Vec2 size, bool* open = nullptr);
         void EndDraggableCard();
 
-        // Interactive Widgets
         void Text(const char* fmt, ...);
         void TextColored(Color col, const char* fmt, ...);
         bool Button(const char* label, Vec2 size = Vec2(0, 0));
@@ -56,7 +50,6 @@ namespace VoidGUI {
         void Separator();
         void Spacing(float height = 6.0f);
 
-        // Accessors & Subsystems
         DrawList* GetDrawList() { return &m_draw_list; }
         Theme& GetTheme() { return m_theme; }
         const InputState& GetInput() const { return m_input; }
@@ -92,6 +85,7 @@ namespace VoidGUI {
         uint32_t m_keybind_id = 0;
         uint32_t m_hot_id = 0;
         float m_delta_time = 0.016f;
+        bool m_mouse_clicked_queued = false;
 
         DragItemState m_drag_item;
         std::unordered_map<uint32_t, float> m_card_heights;
@@ -102,11 +96,10 @@ namespace VoidGUI {
         std::vector<std::pair<uint32_t, AnimState>> m_anims;
     };
 
-    // Global Context Lifecycle
     Context* GetCurrentContext();
     void SetCurrentContext(Context* ctx);
 
-} // namespace VoidGUI
+}
 
 namespace KtnaGUI = VoidGUI;
 namespace ktna = VoidGUI;

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "void_types.hpp"
 #include "void_draw.hpp"
@@ -17,14 +17,12 @@ namespace VoidGUI {
         Vec2 resize_offset;
         float content_width = 0.0f;
 
-        // Multi-Column State
         int columns_count = 1;
         int current_column = 0;
         Vec2 column_start_cursor;
         float column_width = 0.0f;
         float column_max_y = 0.0f;
 
-        // Card Container State
         bool in_card = false;
         uint32_t current_card_id = 0;
         Vec2 card_start_pos;
@@ -37,4 +35,4 @@ namespace VoidGUI {
         Vec2 offset;
     };
 
-} // namespace VoidGUI
+}

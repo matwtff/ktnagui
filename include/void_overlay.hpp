@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -32,4 +32,4 @@ namespace VoidGUI {
         static Vec2 GetScreenSize();
     };
 
-} // namespace VoidGUI
+}
